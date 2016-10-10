@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+
+<project name="Cobertura-Netbeans-Example" default="default" basedir=".">
+
+    <description>Builds, tests, and runs the project Cobertura-Netbeans-Example</description>
+    <import file="nbproject/build-impl.xml"/>
+
+
+<!-- Note : COBERTURA_HOME is an environment variable that points to 
+            the directory where Cobertura was installed -->
+
+    <property environment="env" />
+    <property name="cobertura.dir" value="${env.COBERTURA_HOME}" />
+    <property name="instrumented.classes.dir" value="build/test/instrumented/" />
+    <property name="reports.junit.dir" value="reports/junit/" />
+    <property name="reports.cobertura.dir" value="reports/cobertura/" />
+
+    
+    <taskdef classpathref="cobertura_classpath" resource="tasks.properties" />
+       
+    <path id="cobertura_classpath">
+        <fileset dir="${cobertura.dir}">
+            <include name="cobertura.jar" />
+            <include name="lib/**/*.jar" />
+        </fileset>
+    </path>
+    
+   <target name="Cobertura-Init" depends="init"> 
+      <mkdir dir="reports" />
+      <mkdir dir="reports/junit/" />
+      <mkdir dir="reports/cobertura/" />
+      
+      <delete file="cobertura.ser" />
+   </target>
+    
+   <target name="Cobertura-Instrument" depends="Cobertura-Init,compile">
+       <delete dir="${instrumented.classes.dir}" />
+
+       <cobertura-instrument todir="${instrumented.classes.dir}" datafile="cobertura.ser">
+	  <ignore regex="org.apache.log4j.*" />
+	  <fileset dir="${build.classes.dir}">
+	      <include name="**/*.class" />
+	  </fileset>
+       </cobertura-instrument>  
+   </target>
+   
+   
+
+   <target name="Cobertura-Tests" 
+           depends="Cobertura-Init,compile,compile-test,Cobertura-Instrument">
+		<junit fork="yes" dir="${basedir}" failureProperty="test.failed">
+			<classpath location="${instrumented.classes.dir}" />
+			<classpath location="${build.classes.dir}" />
+                        <classpath location="${build.test.classes.dir}" />
+			<classpath refid="cobertura_classpath" />
+
+			<formatter type="xml" />
+			<test name="${testcase}" todir="${reports.junit.dir}" if="testcase" />
+			<batchtest todir="${reports.junit.dir}" unless="testcase">
+				<fileset dir="${test.src.dir}">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+		<junitreport todir="${reports.junit.dir}">
+			<fileset dir="${reports.junit.dir}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${reports.junit.dir}" />
+		</junitreport>
+  </target>
+   
+  <target name="Cobertura-Report">
+	<cobertura-report destdir="${reports.cobertura.dir}" srcdir="${src.dir}">
+	</cobertura-report>
+  </target>
+        
+
+   <target name="JUnit-Tests-With-Reports" 
+           depends="compile,compile-test">
+		<junit fork="yes" dir="${basedir}" failureProperty="test.failed">
+			<classpath location="${build.classes.dir}" />
+                        <classpath location="${build.test.classes.dir}" />
+			<formatter type="xml" />
+			<test name="${testcase}" todir="${reports.junit.dir}" if="testcase" />
+			<batchtest todir="${reports.junit.dir}" unless="testcase">
+				<fileset dir="${test.src.dir}">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+		<junitreport todir="${reports.junit.dir}">
+			<fileset dir="${reports.junit.dir}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${reports.junit.dir}" />
+		</junitreport>
+  </target>
+  
+</project>

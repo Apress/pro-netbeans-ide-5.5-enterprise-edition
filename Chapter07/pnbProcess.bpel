@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process 
+    name="pnbProcess" 
+    targetNamespace="http://enterprise.netbeans.org/bpel/pnbProcess"
+    xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+    xmlns:wsdlNS="http://enterprise.netbeans.org/bpel/pnbProcess" xmlns:ns1="http://j2ee.netbeans.org/wsdl/pnbWSDL" xmlns:ns2="http://examples.pronetbeans.com/">
+    <import namespace="http://j2ee.netbeans.org/wsdl/pnbWSDL" location="pnbWSDL.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <import namespace="http://examples.pronetbeans.com/" location="PersonLookupServiceService.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <partnerLinks>
+        <partnerLink name="PartnerLinkPersonLookp" partnerLinkType="ns2:PersonLookupServiceLinkType" partnerRole="PersonLookupServiceRole"/>
+        <partnerLink name="pnbPartnerLink" partnerLinkType="ns1:pnbWSDLPartner" myRole="pnbWSDLPortTypeRole"/>
+    </partnerLinks>
+    <variables>
+        <variable name="Person" messageType="ns1:getOrderPriceReply"/>
+        <variable name="PersonName" messageType="ns2:findPersonResponse"/>
+        <variable name="Id" messageType="ns2:findPerson"/>
+        <variable name="OrderId" messageType="ns1:getOrderPriceRequest"/>
+        <variable name="Price" messageType="ns1:getOrderPriceReply"/>
+    </variables>
+    <sequence>
+        <receive name="ReceiveOrder" createInstance="yes" partnerLink="pnbPartnerLink" operation="getOrderPrice" portType="ns1:pnbWSDLPortType" variable="OrderId"/>
+        <if name="If1"/>
+        <invoke name="Invoke1" partnerLink="PartnerLinkPersonLookp" operation="findPerson" portType="ns2:PersonLookupService" inputVariable="Id" outputVariable="PersonName"/>
+        <assign name="Assign1">
+            <copy>
+                <from variable="PersonName"/>
+                <to variable="Person"/>
+            </copy>
+        </assign>
+        <reply name="PriceReply" partnerLink="pnbPartnerLink" operation="getOrderPrice" portType="ns1:pnbWSDLPortType" variable="Person"/>
+    </sequence>
+   
+</process>
